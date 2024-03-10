@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Todo List</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f8f9fa;
+      color: #333;
+    }
+    
+    .container {
+      max-width: 600px;
+      margin-top: 50px;
+      min-height: 90vh;
+      background-color: #fff;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      padding: 30px;
+    }
+
+    .todo-item {
+      margin-bottom: 10px;
+      padding: 8px;
+      border-radius: 10px;
+      background-color: #d3f4d9; /* Light green background */
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      position: relative;
+    }
+
+    .todo-item:hover {
+        background-color: #a7ebc7; /* Lighter shade of green on hover */
+    }
+
+    .todo-item .btn {
+      transition: all 0.3s ease;
+      font-size: 16px;
+    }
+
+    .todo-item .btn:hover {
+      transform: scale(1.1);
+    }
+
+    .todo-item .btn i {
+      pointer-events: none;
+    }
+
+    .input-group-append button {
+      border-top-right-radius: 10px;
+      border-bottom-right-radius: 10px;
+    }
+
+    .input-group-append button i {
+      font-size: 20px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1 class="mb-4 text-center" style="color: #007bff;">Todo List</h1>
+  <div class="input-group mb-3">
+    <input
+      type="text"
+      class="form-control"
+      placeholder="Add new todo"
+      id="todo-input"
+    />
+    <div class="input-group-append">
+      <button class="btn btn-primary" type="button" id="add-btn"><i class="fas fa-plus"></i></button>
+    </div>
+  </div>
+  <ul class="list-group" id="todo-list">
+    <!-- Todo items will be dynamically added here -->
+  </ul>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const todoList = document.getElementById('todo-list');
+    const addBtn = document.getElementById('add-btn');
+    const todoInput = document.getElementById('todo-input');
+    let draggingItem = null;
+
+    function addTodo() {
+      const todoText = todoInput.value.trim();
+      if (todoText !== '') {
+        const todoItem = document.createElement('li');
+        todoItem.className = 'list-group-item d-flex justify-content-between align-items-center todo-item';
+        todoItem.draggable = true;
+        todoItem.innerHTML = `
+          <span>${todoText}</span>
+          <div>
+            <button class="btn btn-info edit-btn" title="Edit"><i class="fas fa-pencil-alt"></i></button>
+            <button class="btn btn-danger delete-btn" title="Delete"><i class="fas fa-trash-alt"></i></button>
+          </div>
+        `;
+        todoList.appendChild(todoItem);
+        todoInput.value = '';
+        addDragAndDropListeners();
+      }
+    }
+
+    function editTodo() {
+      const todoItem = this.closest('.todo-item');
+      const todoText = todoItem.querySelector('span').textContent; // Extracting only the todo content
+      const newText = prompt('Edit todo:', todoText);
+      if (newText !== null && newText.trim() !== '') {
+        todoItem.querySelector('span').textContent = newText.trim(); // Updating the todo content
+      }
+    }
+
+    function deleteTodo() {
+      const todoItem = this.closest('.todo-item');
+      todoItem.style.transform = 'scale(0)';
+      todoItem.addEventListener('transitionend', function () {
+        todoItem.remove();
+      });
+    }
+
+    function handleDragStart(event) {
+      draggingItem = this;
+      setTimeout(() => {
+        this.classList.add('dragging');
+      }, 0);
+    }
+
+    function handleDragEnd() {
+      draggingItem.classList.remove('dragging');
+      draggingItem = null;
+    }
+
+    function handleDragOver(event) {
+      event.preventDefault();
+      const targetItem = event.target.closest('.todo-item');
+      if (targetItem && targetItem !== draggingItem) {
+        const rect = targetItem.getBoundingClientRect();
+        const next = event.clientY - rect.top > rect.bottom - event.clientY;
+        todoList.insertBefore(draggingItem, next ? targetItem.nextSibling : targetItem);
+      }
+    }
+
+    function addDragAndDropListeners() {
+      const todoItems = document.querySelectorAll('.todo-item');
+      todoItems.forEach(item => {
+        item.addEventListener('dragstart', handleDragStart);
+        item.addEventListener('dragend', handleDragEnd);
+      });
+      todoList.addEventListener('dragover', handleDragOver);
+    }
+
+    addBtn.addEventListener('click', addTodo);
+    todoInput.addEventListener('keypress', function (event) {
+      if (event.key === 'Enter') {
+        addTodo();
+      }
+    });
+    document.addEventListener('click', function (event) {
+      if (event.target.classList.contains('edit-btn')) {
+        editTodo.call(event.target);
+      } else if (event.target.classList.contains('delete-btn')) {
+        deleteTodo.call(event.target);
+      }
+    });
+
+    addDragAndDropListeners();
+  });
+</script>
+
+</body>
+</html>
