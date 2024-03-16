@@ -339,6 +339,58 @@
     .pagination button.active {
       background-color: #333;
     }
+
+    /* Add this CSS to your existing styles */
+    .bug-report {
+      position: fixed;
+      bottom: 20px;
+      right: 10px;
+    }
+
+    .bug-report button {
+      background-color: #ff6347;
+      /* Red color */
+      color: white;
+      border: none;
+      padding: 10px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    #bug-report-form {
+      display: none;
+      position: absolute;
+      height: auto;
+      bottom: calc(100% + 10px);
+      /* Adjusted the spacing */
+      right: 0px;
+      /* Adjusted the right alignment */
+      width: 300px;
+      /* Set a fixed width for better layout */
+      background-color: #fff;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      padding: 20px;
+      /* Increased padding for better spacing */
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    #bug-report-form textarea {
+      width: calc(100%);
+      height: 20vh;
+      /* Adjusted width to accommodate padding */
+      margin-bottom: 10px;
+      /* Increased margin bottom for better separation */
+      padding: 5px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      /* Matched border-radius with other elements */
+    }
+
+    #bug-report-form.hidden {
+      display: block;
+      /* Corrected the display property */
+    }
   </style>
 </head>
 
@@ -374,6 +426,16 @@
     <input type="text" placeholder="Search todos" id="search-input" autocomplete="off" style="display: none;" />
     <ul id="todo-list"></ul>
     <div class="pagination"></div>
+    <div class="bug-report">
+      <button id="bug-report-btn">
+        <i class="fas fa-bug"></i> Report Bug
+      </button>
+      <div id="bug-report-form" class="hidden">
+        <textarea id="bug-description" placeholder="Describe the bug..."></textarea>
+        <button id="bug-submit-btn">Submit</button>
+        <button id="bug-cancel-btn">Cancel</button>
+      </div>
+    </div>
   </div>
 
   <script>
@@ -717,6 +779,50 @@
         });
       }
     });
+
+    const bugReportBtn = document.getElementById("bug-report-btn");
+    const bugReportForm = document.getElementById("bug-report-form");
+
+    function toggleBugReportForm() {
+      bugReportForm.classList.toggle("hidden");
+    }
+
+    // Show bug report form when button is clicked
+    bugReportBtn.addEventListener("click", function () {
+      toggleBugReportForm();
+    });
+
+    // Submit bug report
+    const bugSubmitBtn = document.getElementById("bug-submit-btn");
+    const bugCancelBtn = document.getElementById("bug-cancel-btn");
+    const bugDescriptionInput = document.getElementById("bug-description");
+
+    bugSubmitBtn.addEventListener("click", function () {
+      const bugDescription = bugDescriptionInput.value.trim();
+      if (bugDescription !== "") {
+        console.log("Bug description:", bugDescription);
+        toggleBugReportForm();
+        bugDescriptionInput.value = ""; // Clear input field after submission
+      } else {
+        alert("Please provide a description of the bug.");
+      }
+    });
+
+    // Cancel bug report
+    bugCancelBtn.addEventListener("click", function () {
+      toggleBugReportForm();
+      bugDescriptionInput.value = ""; // Clear input field on cancel
+    });
+
+    // Close the dropdown when clicking outside of it
+    document.addEventListener("click", function (event) {
+      if (!event.target.closest('.bug-report')) {
+        const bugReportForm = document.getElementById('bug-report-form');
+        if (!event.target.closest('#bug-report-form') && !bugReportForm.classList.contains('hidden')) {
+          bugReportForm.classList.add('hidden');
+        }
+      }
+    });  
   </script>
 </body>
 
